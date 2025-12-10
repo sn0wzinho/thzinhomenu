@@ -1,13 +1,14 @@
 -- Thzinho Menu v2.0 - Sistema de Autenticação
+-- CONFIGURAÇÃO CORRIGIDA!
 
 -- ===============================================
--- CONFIGURAÇÕES (ALTERE AQUI!)
+-- CONFIGURAÇÕES (USE ESTAS!)
 -- ===============================================
 local CONFIG = {
     -- KeyAuth
-    AppName = "Martinezzkq_'s Application",
-    OwnerID = "bZNR9STn2V",  -- COLE SEU OWNER ID AQUI
-    Version = "1.0",
+    AppName = "Martinezzkq_'s Application",  -- NOME EXATO
+    OwnerID = "bZNR9STn2V",                  -- SEU OWNER ID
+    Version = "1.0",                         -- VERSÃO
     
     -- GitHub
     GitHubUser = "sn0wzinho",
@@ -31,6 +32,15 @@ local LocalPlayer = Players.LocalPlayer
 local authenticated = false
 local sessionID = ""
 local keySystemOpen = true
+
+-- ===============================================
+-- DEBUG: IMPRIMIR CONFIG
+-- ===============================================
+print("🔧 CONFIGURAÇÃO DO KEYAUTH:")
+print("📱 App Name:", CONFIG.AppName)
+print("👤 Owner ID:", CONFIG.OwnerID)
+print("📦 Version:", CONFIG.Version)
+print("================================")
 
 -- ===============================================
 -- FUNÇÕES SIMPLIFICADAS
@@ -91,27 +101,42 @@ local function initKeyAuth()
         CONFIG.Version
     )
     
+    print("🌐 Conectando ao KeyAuth...")
+    print("🔗 URL:", url)
+    
     local success, response = pcall(function()
         return game:HttpGet(url, true)
     end)
     
-    if not success then return false, "Erro de conexão" end
+    if not success then 
+        print("❌ Erro de conexão:", response)
+        return false, "Erro de conexão" 
+    end
+    
+    print("📥 Resposta recebida:", string.sub(response, 1, 200))
     
     local success2, data = pcall(function()
         return HttpService:JSONDecode(response)
     end)
     
-    if not success2 then return false, "Resposta inválida" end
+    if not success2 then 
+        print("❌ Erro ao decodificar JSON:", response)
+        return false, "Resposta inválida" 
+    end
     
     if data.success then
         sessionID = data.sessionid
+        print("✅ Sessão iniciada. Session ID:", sessionID)
         return true, "Sessão iniciada"
+    else
+        print("❌ KeyAuth error:", data.message)
+        return false, data.message or "Erro na inicialização"
     end
-    
-    return false, data.message or "Erro na inicialização"
 end
 
 local function verifyKey(key)
+    print("🔑 Verificando key:", string.sub(key, 1, 8) .. "...")
+    
     if sessionID == "" then
         local success, msg = initKeyAuth()
         if not success then return false, msg end
@@ -129,25 +154,37 @@ local function verifyKey(key)
         sessionID
     )
     
+    print("🔗 URL de verificação:", string.sub(url, 1, 100) .. "...")
+    
     local success, response = pcall(function()
         return game:HttpGet(url, true)
     end)
     
-    if not success then return false, "Erro de conexão" end
+    if not success then 
+        print("❌ Erro na requisição:", response)
+        return false, "Erro de conexão" 
+    end
+    
+    print("📥 Resposta da verificação:", response)
     
     local success2, data = pcall(function()
         return HttpService:JSONDecode(response)
     end)
     
-    if not success2 then return false, "Resposta inválida" end
+    if not success2 then 
+        print("❌ JSON inválido:", response)
+        return false, "Resposta inválida" 
+    end
     
     if data.success then
         authenticated = true
         _G.ThzinhoKey = key
+        print("✅ KEY VÁLIDA! Usuário autenticado.")
         return true, "✅ Key válida!"
+    else
+        print("❌ Key inválida. Mensagem:", data.message)
+        return false, data.message or "❌ Key inválida"
     end
-    
-    return false, data.message or "❌ Key inválida"
 end
 
 local function loadThzinhoMenu()
