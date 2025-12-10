@@ -5,7 +5,7 @@
 -- ===============================================
 local CONFIG = {
     -- KeyAuth
-    AppName = "Thzinho Menu",
+    AppName = "Martinezzkq_'s Application",
     OwnerID = "bZNR9STn2V",  -- COLE SEU OWNER ID AQUI
     Version = "1.0",
     
